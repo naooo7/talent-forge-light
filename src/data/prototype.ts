@@ -9,6 +9,7 @@ export type Question = {
     why: string;
     steps: string[];
   };
+  difficulty?: string;
 };
 
 export type Material = {
