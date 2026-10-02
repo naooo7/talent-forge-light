@@ -2,6 +2,7 @@
 // Fundamental_Question_Bank_SKD_TIU_Kecukupan_Data_60_with_Difficulty.xlsx (Questions sheet).
 // Do not edit records by hand; re-import from the source spreadsheet instead.
 import raw from "./question-bank.json";
+import type { Question } from "./prototype";
 
 export type QuestionDifficulty = "Easy" | "Medium" | "Hard";
 export type AnswerKey = "A" | "B" | "C" | "D" | "E";
