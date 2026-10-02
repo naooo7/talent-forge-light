@@ -41,3 +41,16 @@ export const bankQuestionsFor = (f: { exam?: string; subtest?: string; material?
   questionBank.filter(
     (q) => (!f.exam || q.exam === f.exam) && (!f.subtest || q.subtest === f.subtest) && (!f.material || q.material === f.material) && (!f.topic || q.topic === f.topic),
   );
+
+/** Adapt a bank record to the session Question shape. */
+export const bankToQuestion = (q: BankQuestion): Question => ({
+  id: q.id,
+  prompt: q.question,
+  choices: (["A", "B", "C", "D", "E"] as const).map((key) => ({
+    key,
+    text: q[`option_${key.toLowerCase()}` as "option_a"],
+  })),
+  answer: q.correct_answer,
+  explanation: { why: q.explanation, steps: [] },
+  difficulty: q.difficulty_current,
+});
