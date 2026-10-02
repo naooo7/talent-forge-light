@@ -5,6 +5,7 @@ import { endSession, recordAttempt, startSession } from "@/lib/activity";
 import { Button } from "@/components/ui/button";
 import { DesktopSidebar } from "@/components/app-shell";
 import { findExam, findMaterial, findSubtest, getQuestions } from "@/data/prototype";
+import { bankQuestionsFor, bankToQuestion } from "@/data/question-bank";
 import { cn } from "@/lib/utils";
 
 type DrillItem = { id: string; name: string; count: number };
@@ -31,23 +32,29 @@ export const Route = createFileRoute("/session/$examId/$subtestId/$materialId")(
 
 function SessionScreen() {
   const { examId, subtestId, materialId } = Route.useParams();
-  const { mode, items, timer: timerSec = 0 } = Route.useSearch();
+  const { mode, items, difficulty, timer: timerSec = 0 } = Route.useSearch();
   const navigate = useNavigate();
   const exam = findExam(examId);
   const subtest = findSubtest(examId, subtestId);
   const found = findMaterial(examId, subtestId, materialId);
   const material = found ?? (items?.length ? { name: items.map((i) => i.name).join(", ") } : undefined);
   const questions = useMemo(() => {
+    const bankPool = bankQuestionsFor({ material: "Numerik", topic: "Kecukupan Data" });
     if (!items?.length) return getQuestions();
     const base = getQuestions(99);
     let n = 0;
-    return items.flatMap((it) =>
-      Array.from({ length: it.count }, () => {
+    return items.flatMap((it) => {
+      const bankMat = findMaterial(examId, subtestId, it.id)?.bank;
+      if (bankMat && bankMat.material === "Numerik" && bankMat.topic === "Kecukupan Data" && bankPool.length) {
+        const filtered = bankPool.filter((q) => !difficulty || difficulty === "mixed" || q.difficulty_current.toLowerCase() === difficulty);
+        return filtered.slice(0, it.count).map((q) => ({ ...bankToQuestion(q), materialName: it.name }));
+      }
+      return Array.from({ length: it.count }, () => {
         const b = base[n % base.length]!;
         return { ...b, id: `${it.id}-${n++}`, materialName: it.name };
-      }),
-    );
-  }, [items]);
+      });
+    });
+  }, [items, difficulty, examId, subtestId]);
   const [left, setLeft] = useState(timerSec);
 
   const [index, setIndex] = useState(0);
@@ -257,7 +264,7 @@ function SessionScreen() {
                   <p className="mt-3 text-[15px] leading-[1.65] text-foreground">{q.explanation.why}</p>
                   {q.explanation.steps.length > 0 && (
                     <ol className="mt-6 space-y-5">
-                      {q.explanation.steps.map((step, i) => (
+                      {q.explanation.steps.map((step: string, i: number) => (
                         <li key={i} className="grid grid-cols-[auto_minmax(0,1fr)] gap-4">
                           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[12px] font-semibold text-primary">{i + 1}</span>
                           <div className="min-w-0 pt-0.5">
