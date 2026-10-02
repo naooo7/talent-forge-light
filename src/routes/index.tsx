@@ -159,21 +159,13 @@ function Home() {
           )
         ) : null}
         <div className="relative pr-14">
-          <p className="text-[17px] font-semibold tracking-[-0.015em]">Mau belajar apa hari ini?</p>
-          <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
-            Ayo push latihan soal hari ini.
+          <p className="text-[11.5px] font-semibold uppercase tracking-[0.06em] text-primary">
+            {institution ? `Target: ${institution.short}` : "Belum ada target"}
           </p>
-          <div className="mt-3.5 flex items-center justify-between gap-2">
-            <p className="text-[12px] font-medium text-muted-foreground">
-              {institution ? (
-                <>
-                  Target: <span className="font-semibold text-foreground/80">{institution.short}</span>
-                </>
-              ) : (
-                "Pilih cara latihanmu di Practice"
-              )}
-            </p>
-            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          <p className="mt-1.5 text-[17px] font-semibold tracking-[-0.015em]">Mau belajar apa hari ini?</p>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <p className="text-[13px] leading-snug text-muted-foreground">Ayo push latihan soal hari ini.</p>
+            <ChevronRight className="size-4 shrink-0 text-primary/70" />
           </div>
         </div>
       </Link>

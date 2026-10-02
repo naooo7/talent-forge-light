@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, BookOpen, Compass, Layers3, ListChecks, Timer } from "lucide-react";
+import { ChevronRight, BookOpen, Compass, Layers3, ListChecks, Timer } from "lucide-react";
 import { Screen, PageHeader } from "@/components/app-shell";
 import type { LucideIcon } from "lucide-react";
 
@@ -38,16 +38,16 @@ function Practice() {
             key={id}
             to="/practice/mode/$mode"
             params={{ mode: id }}
-            className="tap group flex min-h-24 items-center gap-4 rounded-lg border border-border bg-surface px-4 py-4 shadow-soft transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:px-5"
+            className="tap group flex h-[88px] items-center gap-3.5 rounded-lg border border-border bg-surface px-4 shadow-soft transition-colors hover:border-border-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary sm:size-11">
-              <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+              <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[15px] font-semibold">{title}</span>
-              <span className="mt-0.5 block text-[13px] leading-5 text-muted-foreground">{description}</span>
+              <span className="block truncate text-[15px] font-semibold">{title}</span>
+              <span className="mt-0.5 line-clamp-2 text-[13px] leading-[18px] text-muted-foreground">{description}</span>
             </span>
-            <ArrowUpRight size={17} className="shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" aria-hidden="true" />
+            <ChevronRight size={16} className="shrink-0 text-muted-foreground/60 transition-colors group-hover:text-primary" aria-hidden="true" />
           </Link>
         ))}
       </div>
