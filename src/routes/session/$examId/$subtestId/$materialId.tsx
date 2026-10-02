@@ -264,7 +264,7 @@ function SessionScreen() {
                   <p className="mt-3 text-[15px] leading-[1.65] text-foreground">{q.explanation.why}</p>
                   {q.explanation.steps.length > 0 && (
                     <ol className="mt-6 space-y-5">
-                      {q.explanation.steps.map((step, i) => (
+                      {q.explanation.steps.map((step: string, i: number) => (
                         <li key={i} className="grid grid-cols-[auto_minmax(0,1fr)] gap-4">
                           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[12px] font-semibold text-primary">{i + 1}</span>
                           <div className="min-w-0 pt-0.5">
