@@ -13,18 +13,18 @@ const FINAL = "Final Challenge";
 
 const subjects: Subject[] = [
   {
+    id: "english", name: "English", description: "Vocabulary, grammar, sentence structure, reading", basePct: 45,
+    levels: [
+      { name: "Level 1", lessons: ["Basic Vocabulary", "Common Words", "Sentence Structure", "Basic Grammar", FINAL] },
+      { name: "Level 2", lessons: ["Tenses", "Prepositions", "Context Clues", "Reading", FINAL] },
+    ],
+  },
+  {
     id: "math", name: "Mathematics", description: "Arithmetic, fractions, percentages, ratios, algebra", basePct: 72,
     levels: [
       { name: "Level 1", lessons: ["Addition", "Subtraction", "Multiplication", "Division", FINAL] },
       { name: "Level 2", lessons: ["Fractions", "Decimals", "Percentages", "Ratios", FINAL] },
       { name: "Level 3", lessons: ["Powers", "Roots", "Algebra", "Equations", FINAL] },
-    ],
-  },
-  {
-    id: "english", name: "English", description: "Vocabulary, grammar, sentence structure, reading", basePct: 45,
-    levels: [
-      { name: "Level 1", lessons: ["Basic Vocabulary", "Common Words", "Sentence Structure", "Basic Grammar", FINAL] },
-      { name: "Level 2", lessons: ["Tenses", "Prepositions", "Context Clues", "Reading", FINAL] },
     ],
   },
   {
