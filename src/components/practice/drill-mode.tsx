@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus } from "lucide-react";
-import { exams } from "@/data/prototype";
+import { exams, subtestGroups } from "@/data/prototype";
 import { cn } from "@/lib/utils";
 import { CardGrid, practiceIconFor, SelectCard, StepHeader } from "./select-card";
 
@@ -21,13 +21,14 @@ const TIMERS = [
 ] as const;
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-const FUND_SCOPES = ["Mathematics", "English", "Bahasa Indonesia", "Logika"];
+const FUND_SCOPES = ["English", "Mathematics", "Bahasa Indonesia", "Logika"];
 const COUNT_OPTIONS = [5, 10, 15, 20, 30];
 
 /** Drill: the most customizable mode. Pick any scope, then pick materials and per-material question counts. */
 export function DrillMode() {
   const [examId, setExamId] = useState<string | null>(null);
   const [subtestId, setSubtestId] = useState<string | null>(null);
+  const [group, setGroup] = useState<string | null>(null);
   const [scope, setScope] = useState<Scope | null>(null);
 
   const exam = exams.find((e) => e.id === examId);
@@ -72,10 +73,26 @@ export function DrillMode() {
       </>
     );
 
+  const groups = subtestGroups(subtest);
+  if (groups.length && !group)
+    return (
+      <>
+        <StepHeader trail={["Drill", exam.name, subtest.name]} title="Pilih kelompok" onBack={() => setSubtestId(null)} />
+        <CardGrid>
+          {groups.map((g) => (
+            <SelectCard key={g} title={g} meta={`${subtest.materials.filter((m) => m.group === g).length} materi`} onClick={() => setGroup(g)} />
+          ))}
+        </CardGrid>
+      </>
+    );
+
+  const list = group ? subtest.materials.filter((m) => m.group === group) : subtest.materials;
+  const trail = ["Drill", exam.name, subtest.name, ...(group ? [group] : [])];
   return (
     <DrillConfig
-      scope={{ trail: ["Drill", exam.name, subtest.name], examId: exam.id, subtestId: subtest.id, materials: subtest.materials.map((m) => ({ id: m.id, name: m.name })) }}
-      onBack={() => setSubtestId(null)}
+      key={trail.join("/")}
+      scope={{ trail: trail, examId: exam.id, subtestId: subtest.id, materials: list.map((m) => ({ id: m.id, name: m.name })) }}
+      onBack={() => (group ? setGroup(null) : setSubtestId(null))}
     />
   );
 }

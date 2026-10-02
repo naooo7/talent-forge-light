@@ -18,6 +18,10 @@ export type Material = {
   total: number;
   questionCount: number;
   minutes: number;
+  /** Optional middle level inside a subtest (e.g. TIU → Numerik). */
+  group?: string;
+  /** Link to canonical question bank records (exam/subtest come from the parent). */
+  bank?: { material: string; topic: string };
 };
 
 export type Subtest = {
@@ -147,6 +151,32 @@ const mat = (
   minutes = 18,
 ): Material => ({ id, name, completed, total, questionCount, minutes });
 
+/** Grouped material: id is prefixed with the group so names may repeat across groups. */
+const gmat = (group: string, name: string, completed: number, total: number, extra: Partial<Material> = {}): Material => ({
+  ...mat(`${slugify(group)}-${slugify(name)}`, name, completed, total),
+  group,
+  ...extra,
+});
+
+/** A subtest with no deeper taxonomy: one material mirroring the subtest itself. */
+const leaf = (id: string, name: string, caption: string, completed: number, total: number): Subtest => ({
+  id,
+  name,
+  caption,
+  materials: [mat(id, name, completed, total)],
+});
+
+function slugify(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/** True when a subtest has no separate material level to choose from. */
+export const isLeafSubtest = (s: Subtest) => s.materials.length === 1 && s.materials[0]!.id === s.id;
+
+/** Ordered middle-level groups of a subtest (empty when materials are flat). */
+export const subtestGroups = (s: Subtest) => [...new Set(s.materials.map((m) => m.group).filter((g): g is string => !!g))];
+
+/** Canonical Practice taxonomy shared by Latihan Soal, Drill Soal and Try Out. */
 export const exams: Exam[] = [
   {
     id: "skd",
@@ -162,6 +192,7 @@ export const exams: Exam[] = [
           mat("integritas", "Integritas", 4, 25),
           mat("bela-negara", "Bela Negara", 11, 30),
           mat("pilar-negara", "Pilar Negara", 2, 20),
+          mat("bahasa-negara", "Bahasa Negara", 0, 20),
         ],
       },
       {
@@ -169,13 +200,17 @@ export const exams: Exam[] = [
         name: "TIU",
         caption: "Intelegensia Umum",
         materials: [
-          mat("penalaran-umum", "Penalaran Umum", 18, 30),
-          mat("penalaran-matematika", "Penalaran Matematika", 12, 30),
-          mat("pengetahuan-kuantitatif", "Pengetahuan Kuantitatif", 6, 25),
-          mat("pemahaman-bacaan", "Pemahaman Bacaan & Menulis", 9, 25),
-          mat("pengetahuan-umum", "Pengetahuan & Pemahaman Umum", 3, 20),
-          mat("lbe", "LBE", 0, 20),
-          mat("lbi", "LBI", 0, 20),
+          gmat("Verbal", "Analogi", 0, 20),
+          gmat("Verbal", "Silogisme", 0, 20),
+          gmat("Verbal", "Analitis", 0, 20),
+          gmat("Numerik", "Berhitung", 0, 20),
+          gmat("Numerik", "Deret Angka", 0, 20),
+          gmat("Numerik", "Perbandingan Kuantitatif", 0, 20),
+          gmat("Numerik", "Soal Cerita", 0, 20),
+          gmat("Numerik", "Kecukupan Data", 0, 60, { questionCount: 60, bank: { material: "Numerik", topic: "Kecukupan Data" } }),
+          gmat("Figural", "Analogi", 0, 20),
+          gmat("Figural", "Ketidaksamaan", 0, 20),
+          gmat("Figural", "Serial", 0, 20),
         ],
       },
       {
@@ -186,7 +221,9 @@ export const exams: Exam[] = [
           mat("pelayanan-publik", "Pelayanan Publik", 14, 30),
           mat("jejaring-kerja", "Jejaring Kerja", 7, 25),
           mat("sosial-budaya", "Sosial Budaya", 5, 25),
-          mat("teknologi-informasi", "Teknologi Informasi", 2, 20),
+          mat("teknologi-informasi", "Teknologi Informasi dan Komunikasi", 2, 20),
+          mat("profesionalisme", "Profesionalisme", 0, 20),
+          mat("anti-radikalisme", "Anti Radikalisme", 0, 20),
         ],
       },
     ],
@@ -196,25 +233,13 @@ export const exams: Exam[] = [
     name: "UTBK",
     caption: "Perguruan Tinggi",
     subtests: [
-      {
-        id: "tps",
-        name: "TPS",
-        caption: "Tes Potensi Skolastik",
-        materials: [
-          mat("penalaran-induktif", "Penalaran Induktif", 6, 25),
-          mat("penalaran-kuantitatif", "Penalaran Kuantitatif", 4, 25),
-        ],
-      },
-      {
-        id: "literasi",
-        name: "Literasi",
-        caption: "Bahasa & Matematika",
-        materials: [
-          mat("literasi-indonesia", "Literasi Bahasa Indonesia", 10, 30),
-          mat("literasi-inggris", "Literasi Bahasa Inggris", 3, 25),
-          mat("penalaran-matematika-utbk", "Penalaran Matematika", 8, 30),
-        ],
-      },
+      leaf("penalaran-umum", "Penalaran Umum", "TPS", 0, 30),
+      leaf("pengetahuan-pemahaman-umum", "Pengetahuan dan Pemahaman Umum", "TPS", 0, 30),
+      leaf("pemahaman-bacaan-menulis", "Pemahaman Bacaan dan Menulis", "TPS", 0, 30),
+      leaf("pengetahuan-kuantitatif", "Pengetahuan Kuantitatif", "TPS", 0, 30),
+      leaf("literasi-indonesia", "Literasi Bahasa Indonesia", "Literasi", 10, 30),
+      leaf("literasi-inggris", "Literasi Bahasa Inggris", "Literasi", 3, 25),
+      leaf("penalaran-matematika", "Penalaran Matematika", "Literasi", 8, 30),
     ],
   },
   {
@@ -222,21 +247,11 @@ export const exams: Exam[] = [
     name: "Psikotes",
     caption: "Seleksi Kerja",
     subtests: [
-      {
-        id: "kognitif",
-        name: "Kognitif",
-        caption: "Logika & Angka",
-        materials: [
-          mat("deret-angka", "Deret Angka", 9, 25),
-          mat("logika-gambar", "Logika Gambar", 5, 25),
-        ],
-      },
-      {
-        id: "kepribadian",
-        name: "Kepribadian",
-        caption: "Profil Diri",
-        materials: [mat("papi-kostick", "PAPI Kostick", 2, 20)],
-      },
+      leaf("verbal", "Verbal", "Kata & Makna", 0, 25),
+      leaf("numerik", "Numerik", "Angka & Hitungan", 0, 25),
+      leaf("logika", "Logika", "Penalaran", 0, 25),
+      leaf("figural", "Figural", "Pola Gambar", 0, 25),
+      leaf("spasial", "Spasial", "Ruang & Bentuk", 0, 25),
     ],
   },
   {
@@ -244,21 +259,10 @@ export const exams: Exam[] = [
     name: "TPA",
     caption: "Tes Potensi Akademik",
     subtests: [
-      {
-        id: "verbal",
-        name: "Verbal",
-        caption: "Kata & Makna",
-        materials: [
-          mat("sinonim-antonim", "Sinonim & Antonim", 12, 30),
-          mat("analogi", "Analogi", 7, 25),
-        ],
-      },
-      {
-        id: "numerik",
-        name: "Numerik",
-        caption: "Angka & Pola",
-        materials: [mat("aritmetika", "Aritmetika", 6, 25)],
-      },
+      leaf("verbal", "Verbal", "Kata & Makna", 12, 30),
+      leaf("numerik", "Numerik", "Angka & Pola", 6, 25),
+      leaf("logika", "Logika", "Penalaran", 0, 25),
+      leaf("figural", "Figural", "Pola Gambar", 0, 25),
     ],
   },
   {
@@ -266,18 +270,11 @@ export const exams: Exam[] = [
     name: "TBI",
     caption: "Tes Bahasa Inggris",
     subtests: [
-      {
-        id: "structure",
-        name: "Structure",
-        caption: "Grammar & Written Expression",
-        materials: [mat("tenses", "Tenses", 8, 30), mat("clauses", "Clauses", 3, 25)],
-      },
-      {
-        id: "reading",
-        name: "Reading",
-        caption: "Reading Comprehension",
-        materials: [mat("main-idea", "Main Idea", 5, 25)],
-      },
+      leaf("vocabulary", "Vocabulary", "Word Knowledge", 0, 25),
+      leaf("grammar", "Grammar", "Rules & Usage", 0, 25),
+      leaf("reading", "Reading", "Reading Comprehension", 5, 25),
+      leaf("structure", "Structure", "Written Expression", 8, 30),
+      leaf("error-recognition", "Error Recognition", "Find the Mistake", 0, 25),
     ],
   },
 ];
@@ -330,8 +327,8 @@ export const reviewItems = [
 export const todaysFocus = {
   examId: "skd",
   subtestId: "tiu",
-  materialId: "penalaran-matematika",
-  name: "Penalaran Matematika",
+  materialId: "numerik-kecukupan-data",
+  name: "Kecukupan Data",
   questions: 15,
   minutes: 18,
 };
