@@ -38,16 +38,22 @@ function SessionScreen() {
   const found = findMaterial(examId, subtestId, materialId);
   const material = found ?? (items?.length ? { name: items.map((i) => i.name).join(", ") } : undefined);
   const questions = useMemo(() => {
+    const bankPool = bankQuestionsFor({ material: "Numerik", topic: "Kecukupan Data" });
     if (!items?.length) return getQuestions();
     const base = getQuestions(99);
     let n = 0;
-    return items.flatMap((it) =>
-      Array.from({ length: it.count }, () => {
+    return items.flatMap((it) => {
+      const bankMat = findMaterial(examId, subtestId, it.id)?.bank;
+      if (bankMat && bankMat.material === "Numerik" && bankMat.topic === "Kecukupan Data" && bankPool.length) {
+        const filtered = bankPool.filter((q) => !difficulty || difficulty === "mixed" || q.difficulty_current.toLowerCase() === difficulty);
+        return filtered.slice(0, it.count).map((q) => ({ ...bankToQuestion(q), materialName: it.name }));
+      }
+      return Array.from({ length: it.count }, () => {
         const b = base[n % base.length]!;
         return { ...b, id: `${it.id}-${n++}`, materialName: it.name };
-      }),
-    );
-  }, [items]);
+      });
+    });
+  }, [items, difficulty, examId, subtestId]);
   const [left, setLeft] = useState(timerSec);
 
   const [index, setIndex] = useState(0);
