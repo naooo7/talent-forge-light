@@ -10,6 +10,27 @@ import { cn } from "@/lib/utils";
 
 type DrillItem = { id: string; name: string; count: number };
 
+function KecukupanDataPrompt({ prompt }: { prompt: string }) {
+  const firstMarker = prompt.indexOf("(1)");
+  const secondMarker = prompt.indexOf("(2)", firstMarker + 3);
+  if (firstMarker < 0 || secondMarker < 0) return <>{prompt}</>;
+
+  const stem = prompt.slice(0, firstMarker).trim();
+  const first = prompt.slice(firstMarker + 3, secondMarker).trim();
+  const second = prompt.slice(secondMarker + 3).trim();
+
+  return (
+    <>
+      <span className="block">{stem}</span>
+      <span className="mt-5 block text-[15px] font-medium">Pernyataan:</span>
+      <span className="mt-2.5 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2.5 text-[16px] font-medium leading-[1.6]">
+        <span>1.</span><span>{first}</span>
+        <span>2.</span><span>{second}</span>
+      </span>
+    </>
+  );
+}
+
 export const Route = createFileRoute("/session/$examId/$subtestId/$materialId")({
   validateSearch: (search: Record<string, unknown>): { mode: string; difficulty?: string | undefined; timer?: number | undefined; items?: DrillItem[] | undefined } => ({
     mode: (search["mode"] as string) ?? "drill",
@@ -193,7 +214,11 @@ function SessionScreen() {
         <main key={q.id} className="screen-in flex-1 pt-7">
           <div>
             <p className="label-xs">{exam?.name ?? examId} · {subtest?.name ?? subtestId}</p>
-            <h1 className="mt-4 text-[19px] font-semibold leading-[1.5]">{q.prompt}</h1>
+            <h1 className="mt-4 text-[19px] font-semibold leading-[1.5]">
+              {(q as { materialName?: string }).materialName === "Kecukupan Data"
+                ? <KecukupanDataPrompt prompt={q.prompt} />
+                : q.prompt}
+            </h1>
 
             <div className="mt-7 grid gap-2.5" role="group" aria-label="Answer choices">
               {q.choices.map((c) => {
