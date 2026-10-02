@@ -5,6 +5,7 @@ import { endSession, recordAttempt, startSession } from "@/lib/activity";
 import { Button } from "@/components/ui/button";
 import { DesktopSidebar } from "@/components/app-shell";
 import { findExam, findMaterial, findSubtest, getQuestions } from "@/data/prototype";
+import { bankQuestionsFor, bankToQuestion } from "@/data/question-bank";
 import { cn } from "@/lib/utils";
 
 type DrillItem = { id: string; name: string; count: number };
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/session/$examId/$subtestId/$materialId")(
 
 function SessionScreen() {
   const { examId, subtestId, materialId } = Route.useParams();
-  const { mode, items, timer: timerSec = 0 } = Route.useSearch();
+  const { mode, items, difficulty, timer: timerSec = 0 } = Route.useSearch();
   const navigate = useNavigate();
   const exam = findExam(examId);
   const subtest = findSubtest(examId, subtestId);
